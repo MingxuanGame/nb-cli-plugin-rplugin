@@ -51,3 +51,15 @@ else:
                     exceptions.append(e)
 
         raise ModuleLoadFailed("Failed to get plugins list.", exceptions)
+
+
+def search_plugins(plugins: List[Plugin], query: str) -> List[Plugin]:
+    return [
+        plugin
+        for plugin in plugins
+        if any(
+            query in value
+            for key, value in plugin.dict().items()
+            if key in {"name", "module_name", "desc", "project_link"}
+        )
+    ]
