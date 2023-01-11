@@ -1,0 +1,156 @@
+# Chinese (Simplified, China) translations for nb-cli-plugin-rplugin.
+# Copyright (C) 2023 MingxuanGame
+# This file is distributed under the same license as the
+# nb-cli-plugin-rplugin project.
+# MingxuanGame <MingxuanGame@outlook.com>, 2023.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: nb-cli-plugin-rplugin 0.1.0\n"
+"Report-Msgid-Bugs-To: MingxuanGame@outlook.com\n"
+"POT-Creation-Date: 2023-01-12 00:00+0800\n"
+"PO-Revision-Date: 2023-01-12 00:19+0000\n"
+"Last-Translator: MingxuanGame <MingxuanGame@outlook.com>\n"
+"Language: zh_Hans_CN\n"
+"Language-Team: MingxuanGame <MingxuanGame@outlook.com>\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.11.0\n"
+
+#: nb_cli_plugin_rplugin/cli.py:35
+msgid "What do you want to do next?"
+msgstr "接下来你想要进行什么操作?"
+
+#: nb_cli_plugin_rplugin/cli.py:41
+msgid "Manage Bot Plugin with rich text."
+msgstr "使用富文本管理 Bot 插件"
+
+#: nb_cli_plugin_rplugin/cli.py:59
+msgid "Run subcommand {}."
+msgstr "运行子命令 {}"
+
+#: nb_cli_plugin_rplugin/cli.py:69
+msgid "What do you want to do?"
+msgstr "你想要进行什么操作?"
+
+#: nb_cli_plugin_rplugin/cli.py:95
+msgid "Page to go({page}/{all_pages}):"
+msgstr "跳转到({page}/{all_pages}):"
+
+#: nb_cli_plugin_rplugin/cli.py:112
+msgid "Which plugin do you want to show?"
+msgstr "选择需要查看的插件:"
+
+#: nb_cli_plugin_rplugin/cli.py:125
+msgid "Previous page."
+msgstr "上一页"
+
+#: nb_cli_plugin_rplugin/cli.py:129
+msgid "Next page."
+msgstr "下一页"
+
+#: nb_cli_plugin_rplugin/cli.py:134
+msgid "Go to the specified page."
+msgstr "跳转到指定页"
+
+#: nb_cli_plugin_rplugin/cli.py:152 nb_cli_plugin_rplugin/cli.py:167
+msgid "Show details of plugins."
+msgstr "显示插件的详细信息"
+
+#: nb_cli_plugin_rplugin/cli.py:172
+msgid "List all plugins in store."
+msgstr "列出商店中的插件"
+
+#: nb_cli_plugin_rplugin/cli.py:175 nb_cli_plugin_rplugin/cli.py:193
+msgid "The count of plugins in a page."
+msgstr "单页显示插件的个数"
+
+#: nb_cli_plugin_rplugin/cli.py:178 nb_cli_plugin_rplugin/cli.py:196
+msgid "The specified page of plugins."
+msgstr "指定的页数"
+
+#: nb_cli_plugin_rplugin/cli.py:189
+msgid "Search plugins in store."
+msgstr "在商店中搜索插件"
+
+#: nb_cli_plugin_rplugin/cli.py:203
+msgid "Plugin name to search:"
+msgstr "搜索的插件名:"
+
+#: nb_cli_plugin_rplugin/cli.py:230
+msgid "The description is not markdown. Do you still read it by raw?"
+msgstr "插件描述非 Markdown 格式，是否以源代码方式阅读?"
+
+#: nb_cli_plugin_rplugin/cli.py:246
+msgid "Open the homepage in the browser."
+msgstr "在浏览器中打开主页"
+
+#: nb_cli_plugin_rplugin/cli.py:248
+msgid "Open the plugin's PyPI page in the browser."
+msgstr "在浏览器中打开插件 PyPI 页面"
+
+#: nb_cli_plugin_rplugin/cli.py:251
+msgid "Read the description."
+msgstr "查看描述"
+
+#: nb_cli_plugin_rplugin/cli.py:260
+msgid "Show the detail of the plugin."
+msgstr "显示插件的详细信息"
+
+#: nb_cli_plugin_rplugin/cli.py:266
+msgid "Disable to show GitHub statistics."
+msgstr "禁用显示 GitHub 统计数据"
+
+#: nb_cli_plugin_rplugin/cli.py:272
+msgid "Disable to show PyPI metadata."
+msgstr "禁用显示 PyPI 元数据"
+
+#: nb_cli_plugin_rplugin/cli.py:283
+msgid "Plugin name to show:"
+msgstr "需要显示的插件名:"
+
+#: nb_cli_plugin_rplugin/handler.py:23
+msgid "Author"
+msgstr "作者"
+
+#: nb_cli_plugin_rplugin/handler.py:24
+msgid "Package"
+msgstr "包名"
+
+#: nb_cli_plugin_rplugin/handler.py:25
+msgid "Homepage"
+msgstr "主页"
+
+#: nb_cli_plugin_rplugin/handler.py:73
+msgid "Store"
+msgstr "商店"
+
+#: nb_cli_plugin_rplugin/handler.py:87
+msgid "Tags"
+msgstr "标签"
+
+#: nb_cli_plugin_rplugin/handler.py:106
+msgid "Module Name"
+msgstr "import 包名"
+
+#: nb_cli_plugin_rplugin/handler.py:126
+msgid "PyPI metadata"
+msgstr "PyPI 元数据"
+
+#: nb_cli_plugin_rplugin/handler.py:128
+msgid "Version"
+msgstr "版本"
+
+#: nb_cli_plugin_rplugin/handler.py:132
+msgid "Keywords"
+msgstr "关键词"
+
+#: nb_cli_plugin_rplugin/handler.py:136
+msgid "Requires Python"
+msgstr "需要的 Python 版本"
+
+#: nb_cli_plugin_rplugin/handler.py:149
+msgid "GitHub statistics"
+msgstr "GitHub 统计数据"

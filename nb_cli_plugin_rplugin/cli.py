@@ -16,6 +16,7 @@ from noneprompt import (
     CancelledError,
 )
 
+from . import _
 from .handler import (
     print_syntax,
     print_plugins,
@@ -30,12 +31,18 @@ from .meta import (
     get_plugin_by_name,
 )
 
+# i18n
+NEXT = _("What do you want to do next?")
 
-@click.group(cls=ClickAliasedGroup, invoke_without_command=True)
+
+@click.group(
+    cls=ClickAliasedGroup,
+    invoke_without_command=True,
+    help=_("Manage Bot Plugin with rich text."),
+)
 @click.pass_context
 @run_async
 async def rplugin(ctx: click.Context):
-    """Manage Bot Plugin with rich text."""
     if ctx.invoked_subcommand is not None:
         return
 
@@ -47,14 +54,19 @@ async def rplugin(ctx: click.Context):
         if sub_cmd := await run_sync(command.get_command)(ctx, sub_cmd_name):
             choices.append(
                 Choice(
-                    sub_cmd.help or f"Run subcommand {sub_cmd.name}",
+                    (
+                        sub_cmd.help
+                        or _("Run subcommand {}.").format(  # noqa: W503
+                            sub_cmd.name
+                        )
+                    ),
                     sub_cmd,
                 )
             )
 
     try:
         result = await ListPrompt(
-            "What do you want to do?", choices=choices
+            _("What do you want to do?"), choices=choices
         ).prompt_async(style=CLI_DEFAULT_STYLE)
     except CancelledError:
         ctx.exit()
@@ -80,7 +92,9 @@ async def _prompt_choice_page(
         nonlocal page
         try:
             _page = await InputPrompt(
-                f"Page to go({page}/{all_pages}):",
+                _("Page to go({page}/{all_pages}):").format(
+                    page=page, all_pages=all_pages
+                ),
                 validator=lambda x: 1 <= int(x) <= all_pages
                 if x.isdigit()
                 else False,
@@ -95,7 +109,7 @@ async def _prompt_choice_page(
         click.clear()
         try:
             result = await ListPrompt(
-                "Which plugin do you want to show?",
+                _("Which plugin do you want to show?"),
                 choices=[
                     Choice(f"{plugin.name} ({plugin.project_link})", plugin)
                     for plugin in now_plugins
@@ -108,16 +122,16 @@ async def _prompt_choice_page(
 
     all_choices = [
         Choice(
-            "See the previous page.",
+            _("Previous page."),
             _previous_page,
         ),
         Choice(
-            "See the next page.",
+            _("Next page."),
             _next_page,
         ),
     ]
     choose_page_choice = Choice(
-        "Go to the specified page.", _choose_specified_page
+        _("Go to the specified page."), _choose_specified_page
     )
 
     while True:
@@ -135,14 +149,14 @@ async def _prompt_choice_page(
             choices.append(choose_page_choice)
         choices.append(
             Choice(
-                "Show details of plugins",
+                _("Show details of plugins."),
                 _show_plugins_detail,
             )
         )
 
         try:
             result = await ListPrompt(
-                "What do you want to do next?",
+                NEXT,
                 choices=choices,
             ).prompt_async(style=CLI_DEFAULT_STYLE)
         except CancelledError:
@@ -150,41 +164,43 @@ async def _prompt_choice_page(
 
         click.clear()
         await result.data()
-        if result.name.startswith("Show details of"):
+        if result.name == _("Show details of plugins."):
             break
-        _, now_plugins = print_plugins(plugins, count, page)
+        __, now_plugins = print_plugins(plugins, count, page)
 
 
-@rplugin.command()
+@rplugin.command(help=_("List all plugins in store."))
 @click.pass_context
 @click.option(
-    "-c", "--count", default=10, help="The count of plugins in a page."
+    "-c", "--count", default=10, help=_("The count of plugins in a page.")
 )
-@click.option("-p", "--page", default=1, help="The specified page of plugins.")
+@click.option(
+    "-p", "--page", default=1, help=_("The specified page of plugins.")
+)
 @run_async
 async def list(
     ctx: click.Context,
     count: int,
     page: int,
 ):
-    """List all plugins in store"""
     await _prompt_choice_page(ctx, await get_plugins(), count, page)
 
 
-@rplugin.command()
+@rplugin.command(help=_("Search plugins in store."))
 @click.pass_context
 @click.argument("name", nargs=1, required=False, default=None)
 @click.option(
-    "-c", "--count", default=10, help="The count of plugins in a page."
+    "-c", "--count", default=10, help=_("The count of plugins in a page.")
 )
-@click.option("-p", "--page", default=1, help="The specified page of plugins.")
+@click.option(
+    "-p", "--page", default=1, help=_("The specified page of plugins.")
+)
 @run_async
 async def search(
     ctx: click.Context, name: Optional[str], count: int, page: int
 ):
-    """Search plugins in store"""
     if name is None:
-        name = await InputPrompt("Plugin name to search:").prompt_async(
+        name = await InputPrompt(_("Plugin name to search:")).prompt_async(
             style=CLI_DEFAULT_STYLE
         )
     if plugins := search_plugins(await get_plugins(), name):
@@ -211,10 +227,11 @@ async def _detail_prompt(
         if pypi.description_content_type != "text/markdown":
             try:
                 result = await ConfirmPrompt(
-                    (
+                    _(
                         "The description is not markdown. "
                         "Do you still read it by raw?"
                     ),
+                    default_choice=True,
                 ).prompt_async(style=CLI_DEFAULT_STYLE)
             except CancelledError:
                 ctx.exit()
@@ -225,13 +242,14 @@ async def _detail_prompt(
 
     try:
         result = await ListPrompt(
-            "What do you want to do next?",
+            NEXT,
             choices=[
-                Choice("Open the homepage in the browser.", _open_homepage),
+                Choice(_("Open the homepage in the browser."), _open_homepage),
                 Choice(
-                    "Open the plugin's PyPI page in the browser.", _open_pypi
+                    _("Open the plugin's PyPI page in the browser."),
+                    _open_pypi,
                 ),
-                Choice("Read the description.", _print_readme),
+                Choice(_("Read the description."), _print_readme),
             ],
         ).prompt_async(style=CLI_DEFAULT_STYLE)
     except CancelledError:
@@ -240,19 +258,19 @@ async def _detail_prompt(
     await result.data()
 
 
-@rplugin.command()
+@rplugin.command(help=_("Show the detail of the plugin."))
 @click.argument("name", nargs=1, required=False, default=None)
 @click.option(
     "--disable-github",
     required=False,
     default=False,
-    help="Disable to show GitHub statistics.",
+    help=_("Disable to show GitHub statistics."),
 )
 @click.option(
     "--disable-pypi",
     required=False,
     default=False,
-    help="Disable to show PyPI metadata.",
+    help=_("Disable to show PyPI metadata."),
 )
 @click.pass_context
 @run_async
@@ -262,9 +280,8 @@ async def info(
     disable_github: bool,
     disable_pypi: bool,
 ):
-    """Show the detail of the plugin"""
     if name is None:
-        name = await InputPrompt("Plugin name to show:").prompt_async(
+        name = await InputPrompt(_("Plugin name to show:")).prompt_async(
             style=CLI_DEFAULT_STYLE
         )
     try:

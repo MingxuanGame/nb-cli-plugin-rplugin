@@ -10,6 +10,7 @@ from rich.columns import Columns
 from rich.console import Console
 from rich.markdown import Markdown
 
+from . import _
 from .meta import Plugin, get_pypi_meta, get_github_statistics
 
 REPO_REGEX = r"^https:\/\/github\.com\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)$"
@@ -17,6 +18,11 @@ REPO_REGEX_INCLUDE_PATH = (
     r"^https:\/\/github\.com\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)"
 )
 console = Console()
+
+# i18n
+AUTHOR = _('Author')
+PACKAGE = _('Package')
+HOMEPAGE = _('Homepage')
 
 
 def _parse_homepage(address: str) -> Text:
@@ -33,15 +39,15 @@ def _make_panel(plugin: Plugin) -> Panel:
         )
     )
 
-    author = Text(f"\n\nAuthor: {plugin.author}\n")
-    author.stylize("medium_purple1", 10)
+    author = Text(f"\n\n{AUTHOR}: ")
+    author.append(f"{plugin.author}\n", "medium_purple1")
     message.append(author)
 
-    package = Text(f"Package: {plugin.project_link}\n", no_wrap=False)
-    package.stylize("bold light_goldenrod3", 9)
+    package = Text(f"{PACKAGE}: ", no_wrap=False)
+    package.append(f"{plugin.project_link}\n", "bold light_goldenrod3")
     message.append(package)
 
-    message.append("Homepage: ")
+    message.append(f"{HOMEPAGE}: ")
     message.append(_parse_homepage(plugin.homepage))
     return Panel(
         message,
@@ -63,7 +69,9 @@ def print_plugins(
         Columns(
             (_make_panel(plugin) for plugin in show_plugins),
             align="center",
-            title=f"NoneBot 商店({page}/{pages})",
+            title="NoneBot {store}({page}/{pages})".format(
+                store=_('Store'), page=page, pages=pages
+            ),
         ),
         emoji=True,
     )
@@ -76,7 +84,9 @@ async def print_plugin_detail(
     disable_pypi: bool,
 ):
     message = Text(
-        plugin.desc + "\n\n🔖Tags:\n", no_wrap=False, overflow="fold"
+        plugin.desc + "\n\n🔖{}:\n".format(_("Tags")),
+        no_wrap=False,
+        overflow="fold",
     )
     message.append(
         Text(" ").join(
@@ -85,16 +95,20 @@ async def print_plugin_detail(
         )
     )
 
-    author = Text(f"\n\n👤Author: {plugin.author}\n")
-    author.stylize("medium_purple1", 10)
+    author = Text(f"\n\n👤{AUTHOR}: ")
+    author.append(f"{plugin.author}\n", "medium_purple1")
     message.append(author)
 
-    package = Text(f"📦Package: {plugin.project_link}\n", no_wrap=False)
-    package.stylize("bold light_goldenrod3", 9)
+    package = Text(f"📦{PACKAGE}: ", no_wrap=False)
+    package.append(f"{plugin.project_link}\n", "bold light_goldenrod3")
     message.append(package)
 
-    homepage = Text(f"🏠Homepage: {plugin.homepage}")
-    homepage.stylize(Style(link=plugin.homepage), 10)
+    module = Text("📦{}: ".format(_("Module Name")), no_wrap=False)
+    module.append(f"{plugin.module_name}\n", "bold light_goldenrod3")
+    message.append(module)
+
+    homepage = Text(f"🏠{HOMEPAGE}: ")
+    homepage.append(plugin.homepage, Style(link=plugin.homepage))
     message.append(homepage)
 
     with Live(
@@ -109,18 +123,18 @@ async def print_plugin_detail(
         if not disable_pypi:
             try:
                 pypi = await get_pypi_meta(plugin.project_link)
-                message.append("\n\n🍱PyPI metadata:\n")
+                message.append("\n\n🍱{}:\n".format(_('PyPI metadata')))
 
-                version = Text(f"Version: {pypi.version}\n")
-                version.stylize("chartreuse1", 9)
+                version = Text("{}: ".format(_('Version')))
+                version.append(f"{pypi.version}\n", "chartreuse1")
                 message.append(version)
 
-                keywords = Text(f"Keywords: {pypi.keywords}\n")
-                keywords.stylize("chartreuse1", 10)
+                keywords = Text("{}: ".format(_('Keywords')))
+                keywords.append(f"{pypi.keywords}\n", "chartreuse1")
                 message.append(keywords)
 
-                requires = Text(f"Requires Python: {pypi.requires_python}")
-                requires.stylize("chartreuse1", 17)
+                requires = Text("{}: ".format(_('Requires Python')))
+                requires.append(pypi.requires_python, "chartreuse1")
                 message.append(requires)
             except Exception as e:
                 message.append(
@@ -132,7 +146,7 @@ async def print_plugin_detail(
         ):
             try:
                 repo = await get_github_statistics(match[1])
-                message.append("\n\n🐙GitHub statistics:\n")
+                message.append("\n\n🐙{}:\n".format(_('GitHub statistics')))
 
                 star = Text(f"Stars: {repo.stargazers_count}\n")
                 star.stylize("chartreuse1", 7)
@@ -146,10 +160,11 @@ async def print_plugin_detail(
                 forks.stylize("chartreuse1", 7)
                 message.append(forks)
 
-                license_ = Text(
-                    f"License: {repo.license.name}({repo.license.spdx_id})"
+                license_ = Text("License: ")
+                license_.append(
+                    f"{repo.license.name}({repo.license.spdx_id})",
+                    "chartreuse1",
                 )
-                license_.stylize("chartreuse1", 9)
                 message.append(license_)
             except Exception as e:
                 message.append(

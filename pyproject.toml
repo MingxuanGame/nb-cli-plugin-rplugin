@@ -54,6 +54,7 @@ dev = [
     "flake8>=5.0.4",
     "nonemoji>=0.1.3",
     "pre-commit>=2.21.0",
+    "babel>=2.11.0",
     "nb-cli @ git+https://github.com/nonebot/nb-cli.git",
 ]
 
@@ -62,3 +63,7 @@ rplugin = "nb_cli_plugin_rplugin.installer:install"
 
 [tool.pdm.scripts]
 lint = "flake8"
+lgenerate = "pybabel extract -o messages.pot --project nb-cli-plugin-rplugin --version 0.1.0 nb_cli_plugin_rplugin/"
+linit = "pybabel init -D nb-cli-plugin-rplugin -i messages.pot -d nb_cli_plugin_rplugin/locale/ -l zh_CN"
+lupdate = "pybabel update -D nb-cli-plugin-rplugin -i messages.pot -d nb_cli_plugin_rplugin/locale/"
+lcompile = "pybabel compile -D nb-cli-plugin-rplugin -d nb_cli_plugin_rplugin/locale/"
