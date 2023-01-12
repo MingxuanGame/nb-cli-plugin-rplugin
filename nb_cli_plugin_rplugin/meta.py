@@ -106,6 +106,7 @@ def get_plugin_by_name(name: str, plugins: List[Plugin]) -> Plugin:
 
 async def get_github_statistics(repo: str) -> Repo:
     async with httpx.AsyncClient() as client:
+        print(repo)
         resp = await client.get(
             f"https://api.github.com/repos/{repo}", follow_redirects=True
         )

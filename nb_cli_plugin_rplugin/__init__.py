@@ -1,11 +1,12 @@
-import locale
 import gettext
 from pathlib import Path
+
+from nb_cli.i18n import get_locale
 
 t = gettext.translation(
     "nb-cli-plugin-rplugin",
     localedir=Path(__file__).parent / "locale",
-    languages=[lang] if (lang := locale.getlocale()[0]) else None,
+    languages=[lang] if (lang := get_locale()) else None,
     fallback=True,
 )
 _ = t.gettext

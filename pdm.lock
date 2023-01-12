@@ -244,7 +244,7 @@ name = "nb-cli"
 version = "0.6.7"
 requires_python = ">=3.8,<4.0"
 git = "https://github.com/nonebot/nb-cli.git"
-revision = "4eb6d6dd78211d82d3ed236f2eeeb6082e9c39ce"
+revision = "056c7e7688d260614bb5f6839517913d4428b30e"
 summary = "CLI for nonebot2"
 dependencies = [
     "anyio<4.0.0,>=3.6.2",
@@ -541,7 +541,7 @@ summary = "Backport of pathlib-compatible object wrapper for zip files"
 
 [metadata]
 lock_version = "4.1"
-content_hash = "sha256:ece5eccd603436dfc3cc2283f834f794b6c30548d7175af4bb6e2aa278e00c3e"
+content_hash = "sha256:30af8586fe7a2393dd54802fdc3f1f53637769c0adcbbf236373717dc43b2e2c"
 
 [metadata.files]
 "anyio 3.6.2" = [
