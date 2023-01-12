@@ -3,22 +3,16 @@ from typing import List, Optional, cast
 
 import click
 from nb_cli.config import GLOBAL_CONFIG
-from nb_cli.cli import (
-    CLI_DEFAULT_STYLE,
-    ClickAliasedGroup,
-    run_sync,
-    run_async,
-)
-from noneprompt import (
+from nb_cli.cli import ClickAliasedGroup, run_sync, run_async
+
+from . import _
+from .prompt import (
     Choice,
     ListPrompt,
     InputPrompt,
     ConfirmPrompt,
-    CancelledError,
     CheckboxPrompt,
 )
-
-from . import _
 from .meta import (
     Plugin,
     get_plugins,
@@ -67,13 +61,9 @@ async def rplugin(ctx: click.Context):
                 )
             )
 
-    try:
-        result = await ListPrompt(
-            _("What do you want to do?"), choices=choices
-        ).prompt_async(style=CLI_DEFAULT_STYLE)
-    except CancelledError:
-        ctx.exit()
-
+    result = await ListPrompt(
+        ctx, _("What do you want to do?"), choices=choices
+    )
     sub_cmd = result.data
     await run_sync(ctx.invoke)(sub_cmd)
 
@@ -93,48 +83,40 @@ async def _prompt_choice_page(
 
     async def _choose_specified_page():
         nonlocal page
-        try:
-            _page = await InputPrompt(
-                _("Page to go({page}/{all_pages}):").format(
-                    page=page, all_pages=all_pages
-                ),
-                validator=lambda x: 1 <= int(x) <= all_pages
-                if x.isdigit()
-                else False,
-            ).prompt_async(
-                style=CLI_DEFAULT_STYLE,
-            )
-        except CancelledError:
-            ctx.exit()
+        _page = await InputPrompt(
+            ctx,
+            _("Page to go({page}/{all_pages}):").format(
+                page=page, all_pages=all_pages
+            ),
+            validator=lambda x: 1 <= int(x) <= all_pages
+            if x.isdigit()
+            else False,
+        )
         page = int(_page)
 
     async def _show_plugins_detail():
         click.clear()
-        try:
-            result = await ListPrompt(
-                _("Which plugin do you want to show?"),
-                choices=[
-                    Choice(f"{plugin.name} ({plugin.project_link})", plugin)
-                    for plugin in now_plugins
-                ],
-            ).prompt_async(style=CLI_DEFAULT_STYLE)
-        except CancelledError:
-            ctx.exit()
+        result = await ListPrompt(
+            ctx,
+            _("Which plugin do you want to show?"),
+            choices=[
+                Choice(f"{plugin.name} ({plugin.project_link})", plugin)
+                for plugin in now_plugins
+            ],
+        )
 
         await _detail_prompt(ctx, result.data, False, False)
 
     async def _install_plugins():
         click.clear()
-        try:
-            result = await CheckboxPrompt(
-                _("Which plugin(s) do you want to install?"),
-                choices=[
-                    Choice(f"{plugin.name} ({plugin.project_link})", plugin)
-                    for plugin in now_plugins
-                ],
-            ).prompt_async(style=CLI_DEFAULT_STYLE)
-        except CancelledError:
-            ctx.exit()
+        result = await CheckboxPrompt(
+            ctx,
+            _("Which plugin(s) do you want to install?"),
+            choices=[
+                Choice(f"{plugin.name} ({plugin.project_link})", plugin)
+                for plugin in now_plugins
+            ],
+        )
 
         if plugins := [choice.data for choice in result]:
             for plugin in plugins:
@@ -174,8 +156,7 @@ async def _prompt_choice_page(
             # 在最后一页
             choices = [all_choices[0], choose_page_choice]
         else:
-            choices = all_choices[:]
-            choices.append(choose_page_choice)
+            choices = [*all_choices, choose_page_choice]
         choices.extend(
             (
                 Choice(
@@ -186,14 +167,11 @@ async def _prompt_choice_page(
             )
         )
 
-        try:
-            result = await ListPrompt(
-                NEXT,
-                choices=choices,
-            ).prompt_async(style=CLI_DEFAULT_STYLE)
-        except CancelledError:
-            ctx.exit()
-
+        result = await ListPrompt(
+            ctx,
+            NEXT,
+            choices=choices,
+        )
         click.clear()
         await result.data()
         if result.name == _("Show details of plugins."):
@@ -229,16 +207,14 @@ async def _detail_prompt(
     async def _print_readme():
         pypi = await get_pypi_meta(plugin.project_link)
         if pypi.description_content_type != "text/markdown":
-            try:
-                result = await ConfirmPrompt(
-                    _(
-                        "The description is not markdown. "
-                        "Do you still read it by raw?"
-                    ),
-                    default_choice=True,
-                ).prompt_async(style=CLI_DEFAULT_STYLE)
-            except CancelledError:
-                ctx.exit()
+            result = await ConfirmPrompt(
+                ctx,
+                _(
+                    "The description is not markdown. "
+                    "Do you still read it by raw?"
+                ),
+                default_choice=True,
+            )
             if result:
                 print_ = print_syntax
             else:
@@ -248,24 +224,22 @@ async def _detail_prompt(
         click.clear()
         print_(pypi.description)
 
-    try:
-        result = await ListPrompt(
-            NEXT,
-            choices=[
-                Choice(_("Open the homepage in the browser."), _open_homepage),
-                Choice(
-                    _("Open the plugin's PyPI page in the browser."),
-                    _open_pypi,
-                ),
-                Choice(_("Read the description."), _print_readme),
-                Choice(
-                    _("Install the plugin."),
-                    _install_plugin,
-                ),
-            ],
-        ).prompt_async(style=CLI_DEFAULT_STYLE)
-    except CancelledError:
-        ctx.exit()
+    result = await ListPrompt(
+        ctx,
+        NEXT,
+        choices=[
+            Choice(_("Open the homepage in the browser."), _open_homepage),
+            Choice(
+                _("Open the plugin's PyPI page in the browser."),
+                _open_pypi,
+            ),
+            Choice(_("Read the description."), _print_readme),
+            Choice(
+                _("Install the plugin."),
+                _install_plugin,
+            ),
+        ],
+    )
 
     await result.data()
 
@@ -301,9 +275,7 @@ async def search(
     ctx: click.Context, name: Optional[str], count: int, page: int
 ):
     if name is None:
-        name = await InputPrompt(_("Plugin name to search:")).prompt_async(
-            style=CLI_DEFAULT_STYLE
-        )
+        name = await InputPrompt(ctx, _("Plugin name to search:"))
     if plugins := search_plugins(await get_plugins(), name):
         await _prompt_choice_page(ctx, plugins, count, page)
     ctx.exit(1)
@@ -332,9 +304,7 @@ async def info(
     disable_pypi: bool,
 ):
     if name is None:
-        name = await InputPrompt(_("Plugin name to show:")).prompt_async(
-            style=CLI_DEFAULT_STYLE
-        )
+        name = await InputPrompt(ctx, _("Plugin name to show:"))
     try:
         plugin = get_plugin_by_name(name, await get_plugins())
     except Exception:
