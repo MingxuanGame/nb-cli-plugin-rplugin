@@ -1,5 +1,5 @@
 import re
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 from rich.live import Live
 from rich.text import Text
@@ -9,6 +9,7 @@ from rich.syntax import Syntax
 from rich.columns import Columns
 from rich.console import Console
 from rich.markdown import Markdown
+from nb_cli.handlers import call_pip_install
 
 from . import _
 from .meta import Plugin, get_pypi_meta, get_github_statistics
@@ -179,3 +180,12 @@ def print_markdown(markdown: str):
 
 def print_syntax(code: str):
     console.print(Syntax(code, "reStructuredText"))
+
+
+async def install_plugin(
+    plugins: List[Plugin], pypi_args: Optional[List[str]]
+):
+    proc = await call_pip_install(
+        [plugin.project_link for plugin in plugins], pypi_args
+    )
+    await proc.wait()

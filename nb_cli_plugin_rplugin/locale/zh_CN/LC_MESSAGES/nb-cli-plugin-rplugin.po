@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: nb-cli-plugin-rplugin 0.1.0\n"
 "Report-Msgid-Bugs-To: MingxuanGame@outlook.com\n"
 "POT-Creation-Date: 2023-01-12 00:00+0800\n"
-"PO-Revision-Date: 2023-01-12 00:19+0000\n"
+"PO-Revision-Date: 2023-01-12 00:19+0120\n"
 "Last-Translator: MingxuanGame <MingxuanGame@outlook.com>\n"
 "Language: zh_Hans_CN\n"
 "Language-Team: MingxuanGame <MingxuanGame@outlook.com>\n"
@@ -28,16 +28,17 @@ msgid "Manage Bot Plugin with rich text."
 msgstr "使用富文本管理 Bot 插件"
 
 #: nb_cli_plugin_rplugin/cli.py:59
-msgid "Run subcommand {}."
+#, fuzzy
+msgid "Run subcommand {}"
 msgstr "运行子命令 {}"
-
-#: nb_cli_plugin_rplugin/cli.py:69
-msgid "What do you want to do?"
-msgstr "你想要进行什么操作?"
 
 #: nb_cli_plugin_rplugin/cli.py:95
 msgid "Page to go({page}/{all_pages}):"
 msgstr "跳转到({page}/{all_pages}):"
+
+#: nb_cli_plugin_rplugin/cli.py:69
+msgid "What do you want to do?"
+msgstr "你想要进行什么操作?"
 
 #: nb_cli_plugin_rplugin/cli.py:112
 msgid "Which plugin do you want to show?"
@@ -96,6 +97,7 @@ msgid "Read the description."
 msgstr "查看描述"
 
 #: nb_cli_plugin_rplugin/cli.py:260
+#, fuzzy
 msgid "Show the detail of the plugin."
 msgstr "显示插件的详细信息"
 
@@ -110,6 +112,25 @@ msgstr "禁用显示 PyPI 元数据"
 #: nb_cli_plugin_rplugin/cli.py:283
 msgid "Plugin name to show:"
 msgstr "需要显示的插件名:"
+
+#: nb_cli_plugin_rplugin/cli.py:130
+#, fuzzy
+msgid "Which plugin(s) do you want to install?"
+msgstr "选择需要查看的插件:"
+
+#: nb_cli_plugin_rplugin/cli.py:145 nb_cli_plugin_rplugin/cli.py:223
+msgid "Failed to add plugin {plugin.name} to config: {e}"
+msgstr "添加插件 {plugin.name} 到配置文件失败: {e}"
+
+#: nb_cli_plugin_rplugin/cli.py:185
+#, fuzzy
+msgid "Install plugins."
+msgstr "列出商店中的插件"
+
+#: nb_cli_plugin_rplugin/cli.py:262
+#, fuzzy
+msgid "Install the plugin."
+msgstr "列出商店中的插件"
 
 #: nb_cli_plugin_rplugin/handler.py:23
 msgid "Author"

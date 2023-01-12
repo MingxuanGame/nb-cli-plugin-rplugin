@@ -2,6 +2,7 @@ import webbrowser
 from typing import List, Optional, cast
 
 import click
+from nb_cli.config import GLOBAL_CONFIG
 from nb_cli.cli import (
     CLI_DEFAULT_STYLE,
     ClickAliasedGroup,
@@ -14,21 +15,23 @@ from noneprompt import (
     InputPrompt,
     ConfirmPrompt,
     CancelledError,
+    CheckboxPrompt,
 )
 
 from . import _
-from .handler import (
-    print_syntax,
-    print_plugins,
-    print_markdown,
-    print_plugin_detail,
-)
 from .meta import (
     Plugin,
     get_plugins,
     get_pypi_meta,
     search_plugins,
     get_plugin_by_name,
+)
+from .handler import (
+    print_syntax,
+    print_plugins,
+    install_plugin,
+    print_markdown,
+    print_plugin_detail,
 )
 
 # i18n
@@ -120,6 +123,32 @@ async def _prompt_choice_page(
 
         await _detail_prompt(ctx, result.data, False, False)
 
+    async def _install_plugins():
+        click.clear()
+        try:
+            result = await CheckboxPrompt(
+                _("Which plugin(s) do you want to install?"),
+                choices=[
+                    Choice(f"{plugin.name} ({plugin.project_link})", plugin)
+                    for plugin in now_plugins
+                ],
+            ).prompt_async(style=CLI_DEFAULT_STYLE)
+        except CancelledError:
+            ctx.exit()
+
+        if plugins := [choice.data for choice in result]:
+            for plugin in plugins:
+                try:
+                    GLOBAL_CONFIG.add_plugin(plugin.module_name)
+                except RuntimeError as e:
+                    click.echo(
+                        _(
+                            "Failed to add plugin {plugin.name} to config: {e}"
+                        ).format(plugin=plugin, e=e)
+                    )
+            await install_plugin(plugins=plugins, pypi_args=None)
+        ctx.exit()
+
     all_choices = [
         Choice(
             _("Previous page."),
@@ -147,10 +176,13 @@ async def _prompt_choice_page(
         else:
             choices = all_choices[:]
             choices.append(choose_page_choice)
-        choices.append(
-            Choice(
-                _("Show details of plugins."),
-                _show_plugins_detail,
+        choices.extend(
+            (
+                Choice(
+                    _("Show details of plugins."),
+                    _show_plugins_detail,
+                ),
+                Choice(_("Install plugins."), _install_plugins),
             )
         )
 
@@ -167,6 +199,75 @@ async def _prompt_choice_page(
         if result.name == _("Show details of plugins."):
             break
         __, now_plugins = print_plugins(plugins, count, page)
+
+
+async def _detail_prompt(
+    ctx: click.Context,
+    plugin: Plugin,
+    disable_github: bool,
+    disable_pypi: bool,
+):
+    await print_plugin_detail(plugin, disable_github, disable_pypi)
+
+    async def _open_homepage():
+        webbrowser.open(plugin.homepage)
+
+    async def _open_pypi():
+        webbrowser.open(f"https://pypi.org/project/{plugin.project_link}")
+
+    async def _install_plugin():
+        try:
+            GLOBAL_CONFIG.add_plugin(plugin.module_name)
+        except RuntimeError as e:
+            click.echo(
+                _("Failed to add plugin {plugin.name} to config: {e}").format(
+                    plugin=plugin, e=e
+                )
+            )
+        await install_plugin(plugins=[plugin], pypi_args=None)
+
+    async def _print_readme():
+        pypi = await get_pypi_meta(plugin.project_link)
+        if pypi.description_content_type != "text/markdown":
+            try:
+                result = await ConfirmPrompt(
+                    _(
+                        "The description is not markdown. "
+                        "Do you still read it by raw?"
+                    ),
+                    default_choice=True,
+                ).prompt_async(style=CLI_DEFAULT_STYLE)
+            except CancelledError:
+                ctx.exit()
+            if result:
+                print_ = print_syntax
+            else:
+                ctx.exit()
+        else:
+            print_ = print_markdown
+        click.clear()
+        print_(pypi.description)
+
+    try:
+        result = await ListPrompt(
+            NEXT,
+            choices=[
+                Choice(_("Open the homepage in the browser."), _open_homepage),
+                Choice(
+                    _("Open the plugin's PyPI page in the browser."),
+                    _open_pypi,
+                ),
+                Choice(_("Read the description."), _print_readme),
+                Choice(
+                    _("Install the plugin."),
+                    _install_plugin,
+                ),
+            ],
+        ).prompt_async(style=CLI_DEFAULT_STYLE)
+    except CancelledError:
+        ctx.exit()
+
+    await result.data()
 
 
 @rplugin.command(help=_("List all plugins in store."))
@@ -206,60 +307,6 @@ async def search(
     if plugins := search_plugins(await get_plugins(), name):
         await _prompt_choice_page(ctx, plugins, count, page)
     ctx.exit(1)
-
-
-async def _detail_prompt(
-    ctx: click.Context,
-    plugin: Plugin,
-    disable_github: bool,
-    disable_pypi: bool,
-):
-    await print_plugin_detail(plugin, disable_github, disable_pypi)
-
-    async def _open_homepage():
-        webbrowser.open(plugin.homepage)
-
-    async def _open_pypi():
-        webbrowser.open(f"https://pypi.org/project/{plugin.project_link}")
-
-    async def _print_readme():
-        pypi = await get_pypi_meta(plugin.project_link)
-        if pypi.description_content_type != "text/markdown":
-            try:
-                result = await ConfirmPrompt(
-                    _(
-                        "The description is not markdown. "
-                        "Do you still read it by raw?"
-                    ),
-                    default_choice=True,
-                ).prompt_async(style=CLI_DEFAULT_STYLE)
-            except CancelledError:
-                ctx.exit()
-            if result:
-                print_ = print_syntax
-            else:
-                ctx.exit()
-        else:
-            print_ = print_markdown
-        click.clear()
-        print_(pypi.description)
-
-    try:
-        result = await ListPrompt(
-            NEXT,
-            choices=[
-                Choice(_("Open the homepage in the browser."), _open_homepage),
-                Choice(
-                    _("Open the plugin's PyPI page in the browser."),
-                    _open_pypi,
-                ),
-                Choice(_("Read the description."), _print_readme),
-            ],
-        ).prompt_async(style=CLI_DEFAULT_STYLE)
-    except CancelledError:
-        ctx.exit()
-
-    await result.data()
 
 
 @rplugin.command(help=_("Show the detail of the plugin."))
