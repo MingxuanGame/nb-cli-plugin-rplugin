@@ -83,6 +83,7 @@ async def print_plugin_detail(
     disable_github: bool,
     disable_pypi: bool,
 ):
+    # sourcery skip: use-fstring-for-concatenation, use-fstring-for-formatting
     message = Text(
         plugin.desc + "\n\n🔖{}:\n".format(_("Tags")),
         no_wrap=False,

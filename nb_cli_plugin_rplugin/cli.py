@@ -236,9 +236,13 @@ async def _detail_prompt(
             except CancelledError:
                 ctx.exit()
             if result:
-                print_syntax(pypi.description)
+                print_ = print_syntax
+            else:
+                ctx.exit()
+        else:
+            print_ = print_markdown
         click.clear()
-        print_markdown(pypi.description)
+        print_(pypi.description)
 
     try:
         result = await ListPrompt(
