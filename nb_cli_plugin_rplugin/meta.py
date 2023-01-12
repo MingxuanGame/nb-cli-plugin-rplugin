@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import httpx
@@ -42,7 +42,7 @@ class Repo(BaseModel):
     open_issues_count: int
     forks_count: int
     archived: bool
-    license: RepoLicense
+    license: Optional[RepoLicense] = None
 
 
 class PyPIPackage(BaseModel):
@@ -106,13 +106,15 @@ def get_plugin_by_name(name: str, plugins: List[Plugin]) -> Plugin:
 
 async def get_github_statistics(repo: str) -> Repo:
     async with httpx.AsyncClient() as client:
-        print(repo)
         resp = await client.get(
             f"https://api.github.com/repos/{repo}", follow_redirects=True
         )
+        data = resp.json()
         if resp.status_code != httpx.codes.OK:
-            raise RuntimeError(f"GitHub API status error: {resp.status_code}")
-        return Repo.parse_obj(resp.json())
+            raise RuntimeError(
+                f"GitHub API error: {data['message']}({resp.status_code})"
+            )
+        return Repo.parse_obj(data)
 
 
 if TYPE_CHECKING:

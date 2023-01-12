@@ -158,16 +158,17 @@ async def print_plugin_detail(
                 issues.stylize("chartreuse1", 12)
                 message.append(issues)
 
-                forks = Text(f"Forks: {repo.forks_count}\n")
+                forks = Text(f"Forks: {repo.forks_count}")
                 forks.stylize("chartreuse1", 7)
                 message.append(forks)
 
-                license_ = Text("License: ")
-                license_.append(
-                    f"{repo.license.name}({repo.license.spdx_id})",
-                    "chartreuse1",
-                )
-                message.append(license_)
+                if repo.license:
+                    license_ = Text("\nLicense: ")
+                    license_.append(
+                        f"{repo.license.name}({repo.license.spdx_id})",
+                        "chartreuse1",
+                    )
+                    message.append(license_)
             except Exception as e:
                 message.append(
                     Text(f"\n\n[{e.__class__.__name__}] {str(e)}", style="red")
