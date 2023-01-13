@@ -26,6 +26,7 @@ from .handler import (
     install_plugin,
     print_markdown,
     print_plugin_detail,
+    print_dependencies_tree,
 )
 
 # i18n
@@ -315,3 +316,28 @@ async def info(
         disable_github,
         disable_pypi,
     )
+
+
+@rplugin.command(help=_("Show dependency tree of this project's plugins."))
+@run_async
+async def tree():
+    click.secho(
+        _("Parsing dependency tree takes a while, please wait."), fg="yellow"
+    )
+
+    config = GLOBAL_CONFIG.get_nonebot_config()
+
+    store_plugins = await get_plugins()
+    plugins: List[Plugin] = []
+
+    for module_name in config.plugins:
+        try:
+            plugins.append(get_plugin_by_name(module_name, store_plugins))
+        except RuntimeError as e:
+            click.echo(
+                _(
+                    "Failed to get metadata for {module_name}, Ignored: {e}"
+                ).format(module_name=module_name, e=e)
+            )
+
+    await print_dependencies_tree(plugins)

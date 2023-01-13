@@ -1,8 +1,10 @@
 import re
+import asyncio
 from typing import List, Tuple, Optional
 
 from rich.live import Live
 from rich.text import Text
+from rich.tree import Tree
 from rich.panel import Panel
 from rich.style import Style
 from rich.syntax import Syntax
@@ -12,7 +14,13 @@ from rich.markdown import Markdown
 from nb_cli.handlers import call_pip_install
 
 from . import _
-from .meta import Plugin, get_pypi_meta, get_github_statistics
+from .manager import _init, get_version, parse_depends_tree
+from .meta import (
+    Plugin,
+    get_pypi_meta,
+    get_pypi_meta_retry,
+    get_github_statistics,
+)
 
 REPO_REGEX = r"^https:\/\/github\.com\/([a-zA-Z0-9_-]+\/[a-zA-Z0-9_-]+)$"
 REPO_REGEX_INCLUDE_PATH = (
@@ -190,3 +198,34 @@ async def install_plugin(
         [plugin.project_link for plugin in plugins], pypi_args
     )
     await proc.wait()
+
+
+async def print_dependencies_tree(plugins: List[Plugin]):
+    await _init()
+    root = Tree(":open_file_folder: This Project")
+
+    async def _print(plugin: Plugin):
+        try:
+            pypi_metadata = await get_pypi_meta_retry(
+                plugin.project_link, time=2
+            )
+        except Exception as e:
+            tree = Tree(
+                Text(
+                    f"{plugin.project_link} "
+                    f"[{e.__class__.__name__}] {str(e)}",
+                    style="red",
+                )
+            )
+        else:
+            tree = await parse_depends_tree(
+                plugin,
+                pypi_metadata,
+                await get_version(plugin.module_name),
+            )
+        root.add(tree)
+
+    with Live(root):
+        await asyncio.gather(
+            *[asyncio.create_task(_print(plugin)) for plugin in plugins]
+        )

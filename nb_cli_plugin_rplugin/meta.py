@@ -47,10 +47,11 @@ class Repo(BaseModel):
 
 class PyPIPackage(BaseModel):
     description: str
-    description_content_type: str
+    description_content_type: Optional[str] = None
     keywords: str
     version: str
     requires_python: str
+    requires_dist: Optional[List[str]] = None
 
 
 if TYPE_CHECKING:
@@ -135,3 +136,18 @@ else:
                     f"PyPI JSON API status error: {resp.status_code}"
                 )
             return PyPIPackage.parse_obj(resp.json()["info"])
+
+
+async def get_pypi_meta_retry(package: str, time: int = 3) -> PyPIPackage:
+    times = 0
+    if times > time:
+        raise RuntimeError(f"Retried too many times for {package}")
+    while True:
+        try:
+            return await get_pypi_meta(package)
+        except Exception as e:
+            if isinstance(e, RuntimeError) and e.args[0] == (  # noqa: W503
+                "PyPI JSON API status error: 404"
+            ):  # noqa: W503
+                raise
+            times += 1

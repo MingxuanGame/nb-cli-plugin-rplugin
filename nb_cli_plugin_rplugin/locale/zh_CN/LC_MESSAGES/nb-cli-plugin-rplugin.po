@@ -116,6 +116,18 @@ msgstr "需要显示的插件名:"
 msgid "Which plugin(s) do you want to install?"
 msgstr "选择需要安装的插件:"
 
+#: nb_cli_plugin_rplugin/cli.py:321
+msgid "Show dependency tree of this project's plugins."
+msgstr "显示当前项目插件依赖树."
+
+#: nb_cli_plugin_rplugin/cli.py:324
+msgid "Parsing dependency tree takes a while, please wait."
+msgstr "解析依赖树需要一段时间，请稍等"
+
+#: nb_cli_plugin_rplugin/cli.py:334
+msgid "Failed to get metadata for {module_name}, Ignored: {e}"
+msgstr "无法获取 {module_name} 的元数据: {e}，已忽略"
+
 #: nb_cli_plugin_rplugin/cli.py:145 nb_cli_plugin_rplugin/cli.py:223
 msgid "Failed to add plugin {plugin.name} to config: {e}"
 msgstr "添加插件 {plugin.name} 到配置文件失败: {e}"
