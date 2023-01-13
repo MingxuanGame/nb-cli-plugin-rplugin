@@ -6,7 +6,7 @@ authors = [
     {name = "MingxuanGame", email = "MingxuanGame@outlook.com"},
 ]
 dependencies = [
-    # "nb-cli>=1.0.0"
+    "nb-cli>=1.0.0",
     "rich>=13.0.1",
 ]
 requires-python = ">=3.8"
@@ -24,7 +24,7 @@ classifiers = [
 [project.optional-dependencies]
 
 [build-system]
-requires = ["pdm-pep517>=1.0.0"]
+requires = ["pdm-pep517>=1.0.0", "babel~=2.11"]
 build-backend = "pdm.pep517.api"
 
 [tool.black]
@@ -77,3 +77,7 @@ lgenerate = "pybabel extract -o messages.pot --project nb-cli-plugin-rplugin --v
 linit = "pybabel init -D nb-cli-plugin-rplugin -i messages.pot -d nb_cli_plugin_rplugin/locale/ -l zh_CN"
 lupdate = "pybabel update -D nb-cli-plugin-rplugin -i messages.pot -d nb_cli_plugin_rplugin/locale/"
 lcompile = "pybabel compile -D nb-cli-plugin-rplugin -d nb_cli_plugin_rplugin/locale/"
+
+[tool.pdm.build]
+setup-script = "build_mo.py"
+run-setuptools = false
