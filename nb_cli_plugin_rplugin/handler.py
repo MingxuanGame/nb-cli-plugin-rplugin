@@ -201,6 +201,8 @@ async def install_plugin(
 
 
 async def print_dependencies_tree(plugins: List[Plugin]):
+    if not plugins:
+        return
     await _init()
     root = Tree(":open_file_folder: This Project")
 

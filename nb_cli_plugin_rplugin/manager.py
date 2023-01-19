@@ -17,9 +17,8 @@ from nb_cli.handlers import get_default_python
 from .meta import Plugin, PyPIPackage, get_plugins, get_pypi_meta_retry
 
 COLORS = ["bright_cyan", "bright_yellow", "green"]
-
+PLUGINS_DICT = {}
 FIRST = True
-lock = asyncio.Semaphore()
 
 
 class ProjectFinder(MetadataPathFinder):
@@ -36,6 +35,10 @@ class ProjectFinder(MetadataPathFinder):
 
 
 async def _init(python_path: Optional[str] = None):
+    global FIRST
+    if not FIRST:
+        return
+    FIRST = False
     if python_path is None:
         python_path = await get_default_python()
     proc = await asyncio.create_subprocess_exec(
@@ -61,28 +64,37 @@ async def parse_depends_tree(
     plugin_ver: Optional[str] = None,
     _deep: int = 0,
 ) -> Tree:
+    async def _add_dependencies(plugin: Plugin, dependency: str):
+        dependency_meta = await get_pypi_meta_retry(dependency)
+        dependencies.append((plugin, dependency_meta))
+
+    global PLUGINS_DICT
+
     now_ver = pypi_meta.version if pypi_meta else None
     plugins = await get_plugins()
-    plugins = {i.project_link: i for i in plugins}
+    if not PLUGINS_DICT:
+        PLUGINS_DICT = {i.project_link: i for i in plugins}
+    plugins = PLUGINS_DICT
+
     color = COLORS[_deep] if _deep <= 2 else COLORS[_deep - 3]
     if not pypi_meta:
         return Tree(f"[{color}]{plugin.project_link}[/{color}]")
 
     dependencies: List[Tuple[Plugin, PyPIPackage]] = []
+    tasks = []
     for require in pypi_meta.requires_dist or []:
         dependency = require.split(maxsplit=1)[0]
         if i := plugins.get(dependency):
-            try:
-                dependency_meta = await get_pypi_meta_retry(dependency)
-            except Exception as e:
-                return Tree(
-                    Text(
-                        f"{plugin.project_link} "
-                        f"[{e.__class__.__name__}] {str(e)}",
-                        style="red",
-                    )
-                )
-            dependencies.append((i, dependency_meta))
+            tasks.append(_add_dependencies(i, dependency))
+    try:
+        await asyncio.gather(*tasks)
+    except Exception as e:
+        return Tree(
+            Text(
+                f"{plugin.project_link} " f"[{e.__class__.__name__}] {str(e)}",
+                style="red",
+            )
+        )
 
     content = [f"[{color}]{plugin.project_link}[/{color}]"]
     if plugin_ver:
@@ -90,14 +102,15 @@ async def parse_depends_tree(
             if plugin_ver == now_ver:
                 content.append(f" ([bold]{plugin_ver}[/bold])")
             else:
-                content.append(f" ([green]{plugin_ver} {now_ver}⬆️[/green])")
+                content.append(
+                    f" ([bold]{plugin_ver}[/bold] [green]{now_ver}⬆️[/green])"
+                )
         else:
             content.append(f" ({plugin_ver})")
     if _deep == 0:
         content.append(f" {plugin.desc}")
     tree = Tree("".join(content))
-    for require in dependencies:
-        dependency, pypi = require
+    for dependency, pypi in dependencies:
         tree.add(
             await parse_depends_tree(
                 dependency,

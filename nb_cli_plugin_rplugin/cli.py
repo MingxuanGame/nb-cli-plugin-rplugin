@@ -333,7 +333,7 @@ async def tree():
     for module_name in config.plugins:
         try:
             plugins.append(get_plugin_by_name(module_name, store_plugins))
-        except RuntimeError as e:
+        except Exception as e:
             click.echo(
                 _(
                     "Failed to get metadata for {module_name}, Ignored: {e}"
