@@ -93,17 +93,21 @@ async def print_plugin_detail(
     disable_pypi: bool,
 ):
     # sourcery skip: use-fstring-for-concatenation, use-fstring-for-formatting
+    await _init()
+    plugin_version = get_version(plugin.module_name)
+
     message = Text(
-        plugin.desc + "\n\n🔖{}:\n".format(_("Tags")),
+        plugin.desc,
         no_wrap=False,
         overflow="fold",
     )
-    message.append(
-        Text(" ").join(
-            Text(tag.label, style=f"reverse {tag.color}")
-            for tag in plugin.tags
+    if tags := plugin.tags:
+        message.append("\n\n🔖{}:\n".format(_("Tags")))
+        message.append(
+            Text(" ").join(
+                Text(tag.label, style=f"reverse {tag.color}") for tag in tags
+            )
         )
-    )
 
     author = Text(f"\n\n👤{AUTHOR}: ")
     author.append(f"{plugin.author}\n", "medium_purple1")
@@ -121,13 +125,18 @@ async def print_plugin_detail(
     homepage.append(plugin.homepage, Style(link=plugin.homepage))
     message.append(homepage)
 
+    title = (
+        f"[blue]{plugin.name}{'✅' if plugin.is_official else ''}[/blue]"
+        + _(" (Installed [green]{}[/green])").format(  # noqa:W503
+            plugin_version
+        )
+        if plugin_version
+        else f"[blue]{plugin.name}{'✅' if plugin.is_official else ''}[/blue]"
+    )
     with Live(
         Panel(
             message,
-            title=Text(
-                f"{plugin.name}{'✅' if plugin.is_official else ''}",
-                style="blue",
-            ),
+            title=title,
         )
     ):
         if not disable_pypi:
@@ -135,13 +144,17 @@ async def print_plugin_detail(
                 pypi = await get_pypi_meta(plugin.project_link)
                 message.append("\n\n🍱{}:\n".format(_('PyPI metadata')))
 
-                version = Text("{}: ".format(_('Version')))
-                version.append(f"{pypi.version}\n", "chartreuse1")
+                version = Text("{}: ".format(_('Latest Version')))
+                version.append(
+                    f"{pypi.version}{'⬆️' if plugin_version and plugin_version != pypi.version else ''}\n",  # noqa: E501
+                    "chartreuse1",
+                )
                 message.append(version)
 
-                keywords = Text("{}: ".format(_('Keywords')))
-                keywords.append(f"{pypi.keywords}\n", "chartreuse1")
-                message.append(keywords)
+                if pypi.keywords:
+                    keywords = Text("{}: ".format(_('Keywords')))
+                    keywords.append(f"{pypi.keywords}\n", "chartreuse1")
+                    message.append(keywords)
 
                 requires = Text("{}: ".format(_('Requires Python')))
                 requires.append(pypi.requires_python, "chartreuse1")
@@ -156,7 +169,7 @@ async def print_plugin_detail(
         ):
             try:
                 repo = await get_github_statistics(match[1])
-                message.append("\n\n🐙{}:\n".format(_('GitHub statistics')))
+                message.append("\n\n🐙{}\n".format(_('GitHub statistics')))
 
                 star = Text(f"Stars: {repo.stargazers_count}\n")
                 star.stylize("chartreuse1", 7)
@@ -223,7 +236,7 @@ async def print_dependencies_tree(plugins: List[Plugin]):
             tree = await parse_depends_tree(
                 plugin,
                 pypi_metadata,
-                await get_version(plugin.module_name),
+                get_version(plugin.module_name),
             )
         root.add(tree)
 

@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: nb-cli-plugin-rplugin 0.1.0\n"
 "Report-Msgid-Bugs-To: MingxuanGame@outlook.com\n"
 "POT-Creation-Date: 2023-01-12 00:00+0800\n"
-"PO-Revision-Date: 2023-01-12 00:19+0120\n"
+"PO-Revision-Date: 2023-01-20 01:14+0800\n"
 "Last-Translator: MingxuanGame <MingxuanGame@outlook.com>\n"
 "Language: zh_Hans_CN\n"
 "Language-Team: MingxuanGame <MingxuanGame@outlook.com>\n"
@@ -169,8 +169,8 @@ msgid "PyPI metadata"
 msgstr "PyPI 元数据"
 
 #: nb_cli_plugin_rplugin/handler.py:128
-msgid "Version"
-msgstr "版本"
+msgid "Latest Version"
+msgstr "最新版本"
 
 #: nb_cli_plugin_rplugin/handler.py:132
 msgid "Keywords"
@@ -183,3 +183,7 @@ msgstr "需要的 Python 版本"
 #: nb_cli_plugin_rplugin/handler.py:149
 msgid "GitHub statistics"
 msgstr "GitHub 统计数据"
+
+#: nb_cli_plugin_rplugin/handler.py:130
+msgid " (Installed [green]{}[/green])"
+msgstr "（已安装 [green]{}[/green]）"

@@ -53,7 +53,7 @@ async def _init(python_path: Optional[str] = None):
     sys.meta_path.append(ProjectFinder(json.loads(stdout.strip())))
 
 
-async def get_version(package: str) -> Optional[str]:
+def get_version(package: str) -> Optional[str]:
     with contextlib.suppress(ImportError):
         return version(package)
 
@@ -115,7 +115,7 @@ async def parse_depends_tree(
             await parse_depends_tree(
                 dependency,
                 pypi,
-                await get_version(dependency.module_name),
+                get_version(dependency.module_name),
                 _deep=_deep + 1,
             )
         )
