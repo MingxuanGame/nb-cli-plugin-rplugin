@@ -6,8 +6,9 @@ authors = [
     {name = "MingxuanGame", email = "MingxuanGame@outlook.com"},
 ]
 dependencies = [
-    "nb-cli>=1.0.0",
+    "nb-cli>=1.0.2",
     "rich>=13.0.1",
+    "textual>=0.10.1",
 ]
 requires-python = ">=3.8"
 readme = "README.md"
@@ -65,6 +66,7 @@ dev = [
     "pre-commit>=2.21.0",
     "babel>=2.11.0",
     "pycln>=2.1.2",
+    "textual[dev]>=0.10.1",
     "nb-cli @ git+https://github.com/nonebot/nb-cli.git",
 ]
 
