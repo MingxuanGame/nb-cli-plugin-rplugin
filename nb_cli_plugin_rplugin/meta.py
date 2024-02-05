@@ -56,8 +56,7 @@ class PyPIPackage(BaseModel):
 
 if TYPE_CHECKING:
 
-    async def get_plugins() -> List[Plugin]:
-        ...
+    async def get_plugins() -> List[Plugin]: ...
 
 else:
 
@@ -120,8 +119,7 @@ async def get_github_statistics(repo: str) -> Repo:
 
 if TYPE_CHECKING:
 
-    async def get_pypi_meta(package: str) -> PyPIPackage:
-        ...
+    async def get_pypi_meta(package: str) -> PyPIPackage: ...
 
 else:
 
