@@ -89,9 +89,9 @@ async def _prompt_choice_page(
             _("Page to go({page}/{all_pages}):").format(
                 page=page, all_pages=all_pages
             ),
-            validator=lambda x: 1 <= int(x) <= all_pages
-            if x.isdigit()
-            else False,
+            validator=lambda x: (
+                1 <= int(x) <= all_pages if x.isdigit() else False
+            ),
         )
         page = int(_page)
 
