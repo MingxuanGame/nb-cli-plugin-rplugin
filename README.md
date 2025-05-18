@@ -5,6 +5,8 @@
 
 <div align="center">
 
+此项目已 Archive。另请参阅 https://nonebot.dev/docs/ospp/2025#nb-cli-%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%B7%A5%E5%85%B7%E4%BA%A4%E4%BA%92%E4%BC%98%E5%8C%96
+
 # NB CLI Plugin RPlugin
 
 _✨ NoneBot2 命令行工具 富文本插件管理 ✨_
